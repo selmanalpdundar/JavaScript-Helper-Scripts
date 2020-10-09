@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Compresser</title>
+    <style>
+      input {
+        color: white;
+        display: inline-block;
+        background: #1cb6e0;
+        border: none;
+        padding: 7px 15px;
+        font-weight: 700;
+        border-radius: 3px;
+        white-space: nowrap;
+        cursor: pointer;
+        font-size: 10pt;
+      }
+    </style>
+  </head>
+
+  <body>
+    <input type="file" multiple name="inputfile" id="inputfile" />
+
+    <!--importing lz-sring library for compression-->
+    <script language="javascript" src="lz-string.js"></script>
+
+    <script type="text/javascript">
+      // Add listener to input
+      document
+        .getElementById('inputfile')
+        .addEventListener('change', function () {
+          compressFiles(this.files);
+        });
+
+      /*
+        It takes a list of files and save them after compressing.
+       */
+      function compressFiles(files) {
+        for (var i = 0; i < files.length; i++) {
+          // file that is readed from input
+          var file = files[i];
+          var reader = new FileReader();
+
+          // Assign the fuction which will called when file loading is done.
+          reader.onloadend = (function (file, reader) {
+            return function () {
+              console.log('Compression start for file :', file.name);
+              // Compress reader result.
+              let compressed = LZString.compress(reader.result);
+
+              // Create an a element.
+              const a = document.createElement('a');
+              // Convert string to blob object.
+              const blob = new Blob([JSON.stringify(compressed)]);
+              // Assign the url as blob object.
+              a.href = URL.createObjectURL(blob);
+              // Assign the file name.
+              a.download = file.name;
+              // Click to download file .
+              a.click();
+              console.log('Compression end for file :', file.name);
+            };
+          })(file, reader);
+
+          // Read file
+          reader.readAsText(file);
+        }
+      }
+    </script>
+  </body>
+</html>
