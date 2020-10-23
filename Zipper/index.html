@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        input {
+          color: white;
+          display: inline-block;
+          background: #1cb6e0;
+          border: none;
+          padding: 7px 15px;
+          font-weight: 700;
+          border-radius: 3px;
+          white-space: nowrap;
+          cursor: pointer;
+          font-size: 10pt;
+        }
+      </style>
+</head>
+<body>
+    <input type="file" multiple name="inputfile" id="inputfile" />
+
+    <script language="javascript" src="jszip.js"></script>
+    <script language="javascript" src="FileSaver.js"></script>
+
+    <script type="text/javascript">
+
+    var zip = new JSZip();
+    document
+        .getElementById('inputfile')
+        .addEventListener('change', function () {
+          compressFiles(this.files);
+        });
+
+
+       function compressFiles(files) {
+        for (var i = 0; i < files.length; i++) {
+          // file that is readed from input
+          var file = files[i];
+          var reader = new FileReader();
+
+          // Assign the fuction which will called when file loading is done.
+          reader.onloadend = (function (file, reader) {
+            return function () {
+              console.log('Compression start for file :', file.name);
+              var zip = new JSZip();
+              console.log(reader.result);
+              zip.file(file.name,reader.result);
+              var name = file.name.split(".")[0];
+
+              zip.generateAsync({type:"blob",
+                                 compression: "DEFLATE",
+                                 compressionOptions: {
+                                    level: 9
+                               }})
+                .then(function(content) {
+                    console.log(content);
+                    // see FileSaver.js
+                    saveAs(content,name);
+                    
+                });
+            
+              console.log('Compression end for file :', name);
+            };
+          })(file, reader);
+
+          // Read file
+          reader.readAsText(file);
+        }
+      }
+    </script>
+
+</body>
+</html>
